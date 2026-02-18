@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ScheduleData } from '../types';
 
 // ТУТ БУДЕ ТВОЄ ПОСИЛАННЯ (поки що пусте)
-const GITHUB_URL = 'https://raw.githubusercontent.com/USERNAME/REPO/main/schedule.json';
+const GITHUB_URL = 'https://raw.githubusercontent.com/ogovoq010/svitlo-plus/main/schedule.json';
 
 export const useSchedule = () => {
   const [data, setData] = useState<ScheduleData | null>(null);

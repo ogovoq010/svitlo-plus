@@ -10,5 +10,6 @@ export interface ScheduleData {
   scheduleDate: string;
   isEmergency: boolean;
   isUpdated: boolean;
+  debugMessage?: string;
   queues: Record<string, TimeRange[]>; // "1.1": [{start: 600, end: 840}]
 }

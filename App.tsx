@@ -45,6 +45,7 @@ export default function App() {
         <View style={[styles.circle, { borderColor: circleColor }]}>
           <Text style={styles.statusTitle}>{statusText}</Text>
           {data?.isEmergency && <Text style={styles.emergencyText}>АВАРІЙНІ!</Text>}
+          {data?.isUpdated && <Text style={styles.updatedText}>ОНОВЛЕНИЙ!</Text>}
         </View>
 
         {/* --- ВИБІР ЧЕРГИ --- */}
@@ -96,6 +97,7 @@ const styles = StyleSheet.create({
   },
   statusTitle: { color: '#fff', fontSize: 36, fontWeight: '900', textAlign: 'center' },
   emergencyText: { color: '#ffcc00', fontSize: 20, fontWeight: 'bold', marginTop: 10 },
+  updatedText: { color: '#00ccff', fontSize: 18, fontWeight: 'bold', marginTop: 5 },
 
   sectionTitle: { color: '#ccc', marginBottom: 10, alignSelf: 'flex-start', marginLeft: 20 },
   queueGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8, marginBottom: 30, paddingHorizontal: 10 },
