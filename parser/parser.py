@@ -5,7 +5,7 @@ from datetime import datetime
 import pytz
 
 # Налаштування
-CHANNEL_URL = 'https://t.me/s/Cherkasyenergy'
+CHANNEL_URL = 'https://t.me/pat_cherkasyoblenergo'
 OUTPUT_FILE = 'schedule.json'
 KYIV_TZ = pytz.timezone('Europe/Kiev')
 
