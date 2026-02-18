@@ -22,43 +22,46 @@ def parse_time(t_str):
 def run():
     print(f"Checking {CHANNEL_URL}...")
 
-    # Структура за замовчуванням (якщо нічого не знайдемо)
+    # Структура за замовчуванням (щоб файл завжди існував)
     final_data = {
         "updatedAt": datetime.now(KYIV_TZ).isoformat(),
         "scheduleDate": datetime.now(KYIV_TZ).strftime("%Y-%m-%d"),
         "isEmergency": False,
         "isUpdated": False,
-        "queues": {},  # Пустий об'єкт
-        "debugMessage": "Графік не знайдено або помилка парсингу"
+        "queues": {},
+        "debugMessage": "Графік не знайдено"
     }
 
     try:
-        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+        headers = {'User-Agent': 'Mozilla/5.0'}
         resp = requests.get(CHANNEL_URL, headers=headers)
         html = resp.text
 
-        # Шукаємо всі повідомлення
+        # Чистимо текст від HTML тегів для простішого пошуку
+        # Шукаємо блоки повідомлень
         msgs = re.findall(r'<div class="tgme_widget_message_text.*?>(.*?)</div>', html, re.DOTALL)
-        print(f"Found {len(msgs)} messages.")
 
+        found = False
         for raw_msg in reversed(msgs):
-            # Чистимо текст
+            # Перетворюємо <br> в ентери, видаляємо теги
             text = re.sub(r'<br\s*/>', '\n', raw_msg)
             text = re.sub(r'<[^>]+>', '', text)
 
-            # Спрощений пошук: якщо є цифри "1.1" або "1 черга" і двокрапка
-            if (re.search(r'\d\.\d', text) or "черга" in text.lower()) and ":" in text:
-                print("Processing potential message...")
+            # Шукаємо "черга" і двокрапку - це маркер графіку
+            if "черга" in text.lower() and ":" in text:
+                print("Found schedule message!")
 
                 temp_queues = {}
                 lines = text.split('\n')
 
                 for line in lines:
-                    # Шукаємо "1.1" або "1.2" на початку
+                    # Шукаємо "1.1" або "1 черга"
+                    # Цей regex ловить "1.1", "1.2" і т.д.
                     q_match = re.search(r'(\d\.\d)', line)
                     if q_match:
                         q_id = q_match.group(1)
-                        # Шукаємо час 00:00 - 00:00
+
+                        # Шукаємо час 00:00 - 00:00 (враховуємо різні тире)
                         times = re.findall(r'(\d{1,2}:\d{2})\s*[–\-\—]\s*(\d{1,2}:\d{2})', line)
 
                         ranges = []
@@ -71,23 +74,25 @@ def run():
                         if ranges:
                             temp_queues[q_id] = ranges
 
-                # Якщо знайшли хоча б щось
                 if temp_queues:
                     final_data["queues"] = temp_queues
                     final_data["isEmergency"] = "аварійні" in text.lower()
                     final_data["isUpdated"] = "оновлений" in text.lower()
                     final_data["debugMessage"] = "Успішно оновлено"
-                    print("SUCCESS: Queue data found!")
+                    found = True
                     break
 
+        if not found:
+            print("Warning: Pattern not found in recent messages")
+
     except Exception as e:
-        print(f"Global Error: {e}")
+        print(f"Error: {e}")
         final_data["debugMessage"] = f"Error: {str(e)}"
 
-    # ЗАВЖДИ зберігаємо файл, щоб GitHub Action не падав
+    # ГОЛОВНЕ: Записуємо файл у будь-якому випадку!
     with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
         json.dump(final_data, f, ensure_ascii=False, indent=2)
-    print("schedule.json saved (even if empty).")
+    print("schedule.json created.")
 
 
 if __name__ == "__main__":
